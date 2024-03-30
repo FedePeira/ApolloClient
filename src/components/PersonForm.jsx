@@ -21,6 +21,20 @@ mutation createPerson($name: String!, $street: String!, $city: String!, $phone: 
 }
 `
 
+const ALL_PERSONS = gql`
+  query AllPersons {
+    allPersons {
+      name
+      phone
+      address {
+        street
+        city
+      }
+      id
+    }
+  }
+`
+
 const PersonForm = ({ setError }) => {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -32,13 +46,22 @@ const PersonForm = ({ setError }) => {
       const errors = error.graphQLErrors[0].extensions.error.errors
       const messages = Object.values(errors).map(e => e.message).join('\n')
       setError(messages)
-    }
+    },
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_PERSONS }, ({ allPersons }) => {
+        return {
+          allPersons: allPersons.concat(response.data.addPerson),
+        }
+      })
+    },
   }) 
 
   const submit = (event) => {
     event.preventDefault()
 
-    createPerson({ variables:{ name, phone, street, city } })
+    createPerson({ variables:{ name,
+      phone: phone.length > 0 ? phone : undefined,
+      street, city } })
 
     setName('')
     setPhone('')
