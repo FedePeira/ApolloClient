@@ -45,7 +45,6 @@ const App = () => {
     }, 10000)
   }
 
-  console.log(result.data.allPersons)
 
   if(!token) {
     return(
